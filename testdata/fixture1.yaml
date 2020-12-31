@@ -1,12 +1,3 @@
-# yamlpatch
-
-A tool to apply JSON patch to YAML preserving comments.
-
-
-## Getting Started
-
-```console
-% yamlpatch -p '[{ "op": "replace", "jsonpath": "$.spec.template.spec.containers[*].image", "value": "hello" }]' < testdata/fixture1.yaml
 # https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 apiVersion: apps/v1
 kind: Deployment
@@ -26,11 +17,11 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: "hello"
+          image: nginx:1.14.2
           ports:
             - containerPort: 80
         - name: envoy
-          image: "hello"
+          image: envoyproxy/envoy
           command:
             - /bin/sh
             # dummy command
@@ -54,4 +45,3 @@ spec:
       protocol: TCP
   selector:
     run: my-nginx
-```

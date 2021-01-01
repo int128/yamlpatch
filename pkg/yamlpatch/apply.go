@@ -3,6 +3,7 @@ package yamlpatch
 import (
 	"fmt"
 
+	"github.com/int128/yamlpatch/pkg/jsonpath"
 	"github.com/vmware-labs/yaml-jsonpath/pkg/yamlpath"
 	"gopkg.in/yaml.v3"
 )
@@ -22,11 +23,11 @@ func apply(n *yaml.Node, o Operation) error {
 		return fmt.Errorf("invalid op %s (currently supported: replace)", o.Op)
 	}
 
-	path, err := yamlpath.NewPath(o.JSONPath)
+	targetPath, err := compilePath(o)
 	if err != nil {
-		return fmt.Errorf("invalid path in patch: %w", err)
+		return fmt.Errorf("invalid patch: %w", err)
 	}
-	nodes, err := path.Find(n)
+	nodes, err := targetPath.Find(n)
 	if err != nil {
 		return fmt.Errorf("could not find the path in YAML: %w", err)
 	}
@@ -37,4 +38,25 @@ func apply(n *yaml.Node, o Operation) error {
 		node.Content = o.Value.Content
 	}
 	return nil
+}
+
+func compilePath(o Operation) (*yamlpath.Path, error) {
+	if o.JSONPath != "" && o.JSONPointer != "" {
+		return nil, fmt.Errorf("do not set both path and jsonpath (path=%s, jsonpath=%s)", o.JSONPointer, o.JSONPath)
+	}
+
+	if o.JSONPath != "" {
+		compiled, err := yamlpath.NewPath(o.JSONPath)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON Path (jsonpath=%s): %w", o.JSONPath, err)
+		}
+		return compiled, nil
+	}
+
+	jsonPath := jsonpath.FromJSONPointer(o.JSONPointer)
+	compiled, err := yamlpath.NewPath(jsonPath)
+	if err != nil {
+		return nil, fmt.Errorf("invalid JSON Path (path=%s) -> (jsonpath=%s): %w", o.JSONPointer, jsonPath, err)
+	}
+	return compiled, nil
 }

@@ -11,7 +11,13 @@ type Operation struct {
 	// Currently supported: "replace"
 	Op string `yaml:"op"`
 
+	// JSON pointer.
+	// Either path or jsonpath must be set.
+	// See https://tools.ietf.org/html/rfc6901.
+	JSONPointer string `yaml:"path"`
+
 	// JSON path.
+	// Either path or jsonpath must be set.
 	// See https://github.com/vmware-labs/yaml-jsonpath for details.
 	JSONPath string `yaml:"jsonpath"`
 

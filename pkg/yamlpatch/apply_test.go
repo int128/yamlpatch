@@ -64,11 +64,11 @@ spec:
 			if err := yaml.Unmarshal([]byte(tc.input), &n); err != nil {
 				t.Fatalf("unmarshal error: %s", err)
 			}
-			var p []Operation
-			if err := yaml.Unmarshal([]byte(tc.patch), &p); err != nil {
+			var ops []Operation
+			if err := yaml.Unmarshal([]byte(tc.patch), &ops); err != nil {
 				t.Fatalf("unmarshal error: %s", err)
 			}
-			if err := Apply(&n, p); err != nil {
+			if err := Apply(&n, ops); err != nil {
 				t.Errorf("apply error: %s", err)
 			}
 			var b strings.Builder

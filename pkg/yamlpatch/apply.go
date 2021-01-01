@@ -7,8 +7,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func Apply(n *yaml.Node, p []Operation) error {
-	for _, operation := range p {
+// Apply applies the set of operations to the YAML node in order.
+func Apply(n *yaml.Node, ops []Operation) error {
+	for _, operation := range ops {
 		if err := apply(n, operation); err != nil {
 			return fmt.Errorf("yamlpatch.Apply error: %w", err)
 		}

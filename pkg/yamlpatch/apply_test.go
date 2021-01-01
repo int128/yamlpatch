@@ -32,7 +32,7 @@ spec:
 		want  string
 	}
 	testcases := map[string]testcase{
-		"replaceImage": {
+		"replaceScalarString": {
 			input: deploymentFixture,
 			patch: `
 - op: replace
@@ -54,6 +54,79 @@ spec:
         - name: nginx
           # example
           image: foo
+`,
+		},
+		"replaceScalerInt": {
+			input: deploymentFixture,
+			patch: `
+- op: replace
+  jsonpath: $.spec.replicas
+  value: 100
+`,
+			want: `# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 100 # at least 3
+  template:
+    spec:
+      containers:
+        - name: nginx
+          # example
+          image: nginx:1.14.2
+`,
+		},
+		"replaceMapping": {
+			input: deploymentFixture,
+			patch: `
+- op: replace
+  jsonpath: $.spec.template.spec
+  value:
+    containers:
+      - image: busybox
+`,
+			want: `# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3 # at least 3
+  template:
+    spec:
+      containers:
+        - image: busybox
+`,
+		},
+		"replaceSequence": {
+			input: deploymentFixture,
+			patch: `
+- op: replace
+  jsonpath: $.spec.template.spec.containers
+  value:
+    - image: busybox
+    - image: envoyproxy/envoy:v1.16-latest
+`,
+			want: `# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3 # at least 3
+  template:
+    spec:
+      containers:
+        - image: busybox
+        - image: envoyproxy/envoy:v1.16-latest
 `,
 		},
 	}

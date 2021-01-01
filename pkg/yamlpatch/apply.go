@@ -31,12 +31,9 @@ func apply(n *yaml.Node, o Operation) error {
 		return fmt.Errorf("could not find the path in YAML: %w", err)
 	}
 	for _, node := range nodes {
-		// TODO: fix for a content node
 		node.Kind = o.Value.Kind
 		node.Style = o.Value.Style
-		//log.Printf("%#v -> %#v", node.Value, o.Value.Value)
 		node.Value = o.Value.Value
-		//log.Printf("%#v -> %#v", node.Content, o.Value.Content)
 		node.Content = o.Value.Content
 	}
 	return nil

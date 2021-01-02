@@ -29,6 +29,7 @@ func TestFromJSONPointer(t *testing.T) {
 	}
 	testcases := []testcase{
 		// examples from https://tools.ietf.org/html/rfc6901#section-5
+		{``, `{"foo": ["bar", "baz"], "": 0, "a/b": 1, "c%d": 2, "e^f": 3, "g|h": 4, "i\\j": 5, "k\"l": 6, " ": 7, "m~n": 8}`},
 		{`/foo`, `["bar", "baz"]`},
 		{`/foo/0`, `"bar"`},
 		{`/`, `0`},
@@ -69,7 +70,7 @@ func TestFromJSONPointer(t *testing.T) {
 			}
 			got := strings.TrimSpace(string(b))
 			if diff := cmp.Diff(got, tc.want); diff != "" {
-				t.Errorf("mismatch (-got +want)\n%s", diff)
+				t.Errorf("mismatch (jsonpath=%s) (-got +want)\n%s", jsonPath, diff)
 			}
 		})
 	}

@@ -9,10 +9,9 @@ import (
 // FromJSONPointer transforms a JSON Pointer to JSON Path.
 // See https://tools.ietf.org/html/rfc6901.
 func FromJSONPointer(jsonPointer string) string {
-	jsonPointer = strings.TrimPrefix(jsonPointer, "/")
 	elements := strings.Split(jsonPointer, "/")
 	var b strings.Builder
-	for _, element := range elements {
+	for _, element := range elements[1:] {
 		if i, err := strconv.Atoi(element); err == nil {
 			_, _ = fmt.Fprintf(&b, "[%d]", i)
 			continue

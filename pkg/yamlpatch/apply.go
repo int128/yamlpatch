@@ -22,6 +22,9 @@ func apply(n *yaml.Node, o Operation) error {
 	if o.Op != "replace" {
 		return fmt.Errorf("invalid op %s (currently supported: replace)", o.Op)
 	}
+	if o.Value.IsZero() {
+		return fmt.Errorf("missing value in patch (op=%s)", o.Op)
+	}
 
 	targetPath, err := compilePath(o)
 	if err != nil {
@@ -31,10 +34,14 @@ func apply(n *yaml.Node, o Operation) error {
 	if err != nil {
 		return fmt.Errorf("could not find the path in YAML: %w", err)
 	}
+	if len(nodes) == 0 {
+		return fmt.Errorf("any node did not match (path=%s, jsonpath=%s)", o.JSONPointer, o.JSONPath)
+	}
 	for _, node := range nodes {
 		node.Kind = o.Value.Kind
 		node.Style = o.Value.Style
 		node.Value = o.Value.Value
+		node.Tag = o.Value.Tag
 		node.Content = o.Value.Content
 	}
 	return nil

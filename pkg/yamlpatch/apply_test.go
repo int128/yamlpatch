@@ -1,10 +1,12 @@
 package yamlpatch
 
 import (
+	"os"
 	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"gopkg.in/yaml.v3"
 )
 
@@ -152,6 +154,45 @@ spec:
 			}
 			got := b.String()
 			if diff := cmp.Diff(got, tc.want); diff != "" {
+				t.Errorf("mismatch (-got +want)\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestApply_jsonpatch_conformance(t *testing.T) {
+	f, err := os.Open("testdata/jsonpatch_conformance_tests.yaml")
+	if err != nil {
+		t.Fatalf("could not open testdata: %s", err)
+	}
+	defer f.Close()
+
+	type testcase struct {
+		Doc      yaml.Node   `yaml:"doc"`
+		Patch    []Operation `yaml:"patch"`
+		Expected yaml.Node   `yaml:"expected"`
+		Error    string      `yaml:"error"`
+		Comment  string      `yaml:"comment"`
+	}
+	var testcases []testcase
+	if err := yaml.NewDecoder(f).Decode(&testcases); err != nil {
+		t.Fatalf("could not decode testdata: %s", err)
+	}
+
+	cmpOptsNode := cmpopts.IgnoreFields(yaml.Node{}, "Line", "Column")
+	for _, tc := range testcases {
+		t.Run(tc.Comment, func(t *testing.T) {
+			err := Apply(&tc.Doc, tc.Patch)
+			if tc.Error != "" {
+				if err == nil {
+					t.Errorf("apply wants error but was nil (%s)", tc.Error)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("apply wants non-error but was error: %s", err)
+			}
+			if diff := cmp.Diff(tc.Doc, tc.Expected, cmpOptsNode); diff != "" {
 				t.Errorf("mismatch (-got +want)\n%s", diff)
 			}
 		})

@@ -1,19 +1,31 @@
 # yamlpatch
 
-A tool to apply JSON patch to YAML preserving comments.
+This is a command line tool to apply a JSON Patch to a YAML Document preserving position and comments.
+
+
+## Features
+
+- Support both JSON Pointer and JSON Path (depends on [vmware-labs/yaml-jsonpath](https://github.com/vmware-labs/yaml-jsonpath))
+- Passed the [conformance tests](https://github.com/json-patch/json-patch-tests) of JSON Patch
+- Single binary
+
+**Note**: currently only `op=replace` mode is implemented
 
 
 ## Getting Started
 
-```console
-% yamlpatch -p '[{ "op": "replace", "jsonpath": "$.spec.template.spec.containers[*].image", "value": "hello" }]' < testdata/fixture1.yaml
+TODO: install
+
+### Example: Replace a field in Kubernetes YAML
+
+Input:
+
+```yaml
 # https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-deployment
-  labels:
-    app: nginx
 spec:
   replicas: 3 # at least 3
   selector:
@@ -26,32 +38,44 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: "hello"
-          ports:
-            - containerPort: 80
+          image: nginx:1.14.2
         - name: envoy
-          image: "hello"
-          command:
-            - /bin/sh
-            # dummy command
-            - -c
-            - uname
----
-# https://kubernetes.io/docs/concepts/services-networking/connect-applications-service/
-apiVersion: v1
-kind: Service
+          image: envoyproxy/envoy:v1.16.2
+          args:
+            - --bootstrap-version
+            - "3" # required for v3 API
+```
+
+Apply a patch:
+
+```sh
+yamlpatch -p '[{ "op": "replace", "jsonpath": "$.spec.template.spec.containers[0].image", "value": nginx:1.19 }]' < testdata/fixture1.yaml
+```
+
+Result:
+
+```yaml
+# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: my-nginx
-  labels:
-    run: my-nginx
+  name: nginx-deployment
 spec:
-  ports:
-    # http
-    - port: 80
-      protocol: TCP
-    # grpc
-    - port: 10000
-      protocol: TCP
+  replicas: 3 # at least 3
   selector:
-    run: my-nginx
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.19
+        - name: envoy
+          image: envoyproxy/envoy:v1.16.2
+          args:
+            - --bootstrap-version
+            - "3" # required for v3 API
 ```

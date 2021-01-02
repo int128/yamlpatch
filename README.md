@@ -1,4 +1,4 @@
-# yamlpatch
+# yamlpatch ![test](https://github.com/int128/yamlpatch/workflows/test/badge.svg) [![Go Reference](https://pkg.go.dev/badge/github.com/int128/yamlpatch/pkg/yamlpatch.svg)](https://pkg.go.dev/github.com/int128/yamlpatch/pkg/yamlpatch)
 
 This is a command line tool to apply a JSON Patch to a YAML Document preserving position and comments.
 

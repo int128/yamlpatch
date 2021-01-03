@@ -22,3 +22,8 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+brews:
+  - description: Apply JSON Patch to YAML Document preserving positions and comments
+    tap:
+      owner: int128
+      name: homebrew-yamlpatch

@@ -22,6 +22,9 @@ func apply(n *yaml.Node, o Operation) error {
 	if o.Op == "replace" {
 		return applyReplace(n, o)
 	}
+	if o.Op == "remove" {
+		return applyRemove(n, o)
+	}
 	return fmt.Errorf("invalid op %s (currently supported: replace)", o.Op)
 }
 

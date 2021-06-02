@@ -19,9 +19,13 @@ func Apply(n *yaml.Node, ops []Operation) error {
 }
 
 func apply(n *yaml.Node, o Operation) error {
-	if o.Op != "replace" {
-		return fmt.Errorf("invalid op %s (currently supported: replace)", o.Op)
+	if o.Op == "replace" {
+		return applyReplace(n, o)
 	}
+	return fmt.Errorf("invalid op %s (currently supported: replace)", o.Op)
+}
+
+func applyReplace(n *yaml.Node, o Operation) error {
 	if o.Value.IsZero() {
 		return fmt.Errorf("missing value in patch (op=%s)", o.Op)
 	}
